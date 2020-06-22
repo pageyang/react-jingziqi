@@ -29,6 +29,7 @@ function Square(props) {
     </button>
   )
 }
+function test() { }
 
 
 class Board extends React.Component {
