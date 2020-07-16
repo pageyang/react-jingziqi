@@ -1,25 +1,8 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
+import './config';
 
-// class Square extends React.Component {
-//   // constructor(props) {
-//   //   super(props);
-//   //   this.state = {
-//   //     value: null,
-//   //   };
-//   // }
-//   render() {
-//     return (
-//       <button
-//         className="square"
-//         onClick={() => this.props.onClick()}
-//       >
-//         {this.props.value}
-//       </button>
-//     );
-//   }
-// }
 
 function Square(props) {
   //想写的组件只包含一个 render 方法，并且不包含 state，那么使用函数组件就会更简单
@@ -29,28 +12,26 @@ function Square(props) {
     </button>
   )
 }
-function test() { }
 
 
 class Board extends React.Component {
   renderSquare(j) {
     var boardRaw = [];
-    const column = 3;
-    const raw = 3;
+    const column = global.constants.column;
     for (let i = 0; i < column; i++) {
-      boardRaw.push(<Square key={i + j * raw}
-        value={this.props.squares[i + j * raw]}
-        onClick={() => this.props.onClick(i + j * raw)}
-        styles={this.props.styles(i + j * raw)}
+      boardRaw.push(<Square key={i + j * column}
+        value={this.props.squares[j][i]}
+        onClick={() => this.props.onClick(i, j)}
+        styles={this.props.styles(i, j)}
       />)
     }
     return boardRaw;
   }
 
+  //渲染一个棋盘
   render() {
-    const raw = 3;
     var boardAll = [];
-    for (let j = 0; j < raw; j++) {
+    for (let j = 0; j < global.constants.raw; j++) {
       boardAll.push(
         <div className="board-row" key={j}>
           {this.renderSquare(j)}
@@ -69,77 +50,24 @@ class Game extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      history: [{
-        squares: Array(9).fill(null),
-        nowCoordinate: null,
-      }],
       xIsNext: true,
       stepNumber: 0,
       //历史记录排序方式
       descendingOrder: false,
+      history: [{
+        squares: Array(global.constants.raw)
+          .fill()
+          .map(() => Array(global.constants.column).fill(null)),
+        nowCoordinate: null,
+      }],
     };
-  }
-
-  handleWinnerStyle(winnerLine, i) {
-    const styles = {
-      background: "yellow"
-    };
-    if (winnerLine && winnerLine.indexOf(i) > -1) {
-      return styles;
-    }
-    return null;
-  }
-
-  handleClick(i) {
-    //创建副本
-    const history = this.state.history.slice(0, this.state.stepNumber + 1);
-    const current = history[history.length - 1];
-    const squares = current.squares.slice();
-    const column = 3;
-    const raw = 3;
-    var nowColumn = (i + 1) % column === 0 ? raw : (i + 1) % column;
-    var nowRaw = parseInt(i / raw) + 1;
-    if (calculateWinner(squares) || squares[i]) {
-      return;
-    }
-    squares[i] = this.state.xIsNext ? 'X' : 'O';
-    this.setState({
-      history: history.concat([{
-        squares: squares,
-        //当前坐标
-        nowCoordinate: [nowColumn, nowRaw],
-      }]),
-      stepNumber: history.length,
-      xIsNext: !this.state.xIsNext,
-      //历史记录排序方式
-      descendingOrder: this.state.descendingOrder,
-    });
-  }
-
-  jumpTo(step) {
-    this.setState({
-      stepNumber: step,
-      xIsNext: (step % 2) === 0,
-    });
-  }
-
-  /**
-   * @function 修改用于判断历史记录正序/逆序显示的参数descendingOrder
-   * */
-  reverseHistory = () => {
-    const { descendingOrder } = this.state;
-    this.setState({
-      descendingOrder: !descendingOrder
-    })
   }
 
   render() {
-    // let { lines } = this.state;
     const { history, stepNumber, descendingOrder, } = this.state;
-    // const history = this.state.history;
     const current = history[stepNumber];
-    const winnerLine = calculateWinner(current.squares);
     var localCounter = 1;
+    const winnerLine = calcWinnerGobang(current.squares);//[[1,1],[2,2],[3,3]]
     //map(value,index)
     const moves = history.map((step, move) => {
       const desc = move ?
@@ -148,7 +76,7 @@ class Game extends React.Component {
       //加粗显示当先记录
       return (
         <li key={localCounter++}>
-          <button class={move === stepNumber ? 'currentButton' : 'button'} onClick={() => this.jumpTo(move)}>{desc}</button>
+          <button className={move === stepNumber ? 'currentButton' : 'button'} onClick={() => this.jumpTo(move)}>{desc}</button>
         </li>
       );
     });
@@ -158,7 +86,7 @@ class Game extends React.Component {
     }
     let status;
     if (winnerLine) {
-      const winner = current.squares[winnerLine[0]];
+      const winner = current.squares[winnerLine[0][1]][winnerLine[0][0]];
       status = '赢家:' + winner;
       //每当有人获胜时，高亮显示连成一线的 3 颗棋子。
     } else if (this.state.stepNumber === 9) {
@@ -172,8 +100,8 @@ class Game extends React.Component {
         <div className="game-board">
           <Board
             squares={current.squares}
-            onClick={(i) => this.handleClick(i)}
-            styles={(i) => this.handleWinnerStyle(winnerLine, i)}
+            onClick={(i, j) => this.handleClick(i, j)}
+            styles={(i, j) => this.handleWinnerStyle(winnerLine, i, j)}
           />
         </div>
         <div className="game-info">
@@ -191,23 +119,190 @@ class Game extends React.Component {
       </div>
     );
   }
+
+  // alert(global.constants.column * global.constants.raw);
+  handleWinnerStyle(winnerLine, i, j) {
+    const styles = {
+      background: "yellow"
+    };
+    if (!winnerLine) {
+      return null;
+    }
+    for (let k = 0; k < winnerLine.length; k++) {
+      console.log("啊啊啊啊啊 point" + winnerLine[k]);
+      if (winnerLine[k][0] === i && winnerLine[k][1] === j) {
+        return styles;
+      }
+    }
+
+
+    // if (winnerLine && winnerLine.indexOf([i, j]) > -1) {
+    //   return styles;
+    // }
+    return null;
+  }
+
+  handleClick(i, j) {
+    //创建副本
+    const history = this.state.history.slice(0, this.state.stepNumber + 1);
+    console.log(history);
+    const current = history[history.length - 1];
+    // const squares = current.squares.slice();
+
+    let squares = [];
+    for (let i = 0; i < current.squares.length; i++) {
+      let [...arr1] = current.squares[i];
+      squares.push(arr1);
+    }
+
+    var nowColumn = i;
+    var nowRaw = j;
+    if (calcWinnerGobang(squares) || squares[j][i]) {
+      return;
+    }
+    squares[j][i] = this.state.xIsNext ? 'X' : 'O';
+    this.setState({
+      history: history.concat([{
+        squares: squares,
+        //当前坐标
+        nowCoordinate: [nowColumn, nowRaw],
+      }]),
+      stepNumber: history.length,
+      xIsNext: !this.state.xIsNext,
+      //历史记录排序方式
+      descendingOrder: this.state.descendingOrder,
+    });
+    console.log("啊啊啊啊啊" + this.state.history);
+  }
+
+  jumpTo(step) {
+    console.log("啊啊啊啊啊step" + step);
+    this.setState({
+      stepNumber: step,
+      xIsNext: (step % 2) === 0,
+    });
+  }
+
+  /**
+   * @function 修改用于判断历史记录正序/逆序显示的参数descendingOrder
+   * */
+  reverseHistory = () => {
+    const { descendingOrder } = this.state;
+    this.setState({
+      descendingOrder: !descendingOrder
+    })
+  }
 }
 
-function calculateWinner(squares) {
-  const lines = [
-    [0, 1, 2],
-    [3, 4, 5],
-    [6, 7, 8],
-    [0, 3, 6],
-    [1, 4, 7],
-    [2, 5, 8],
-    [0, 4, 8],
-    [2, 4, 6],
-  ];
-  for (let i = 0; i < lines.length; i++) {
-    const [a, b, c] = lines[i];
-    if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
-      return lines[i];
+// function calculateWinner(squares) {
+//   const lines = [
+//     [0, 1, 2],
+//     [3, 4, 5],
+//     [6, 7, 8],
+//     [0, 3, 6],
+//     [1, 4, 7],
+//     [2, 5, 8],
+//     [0, 4, 8],
+//     [2, 4, 6],
+//   ];
+//   for (let i = 0; i < lines.length; i++) {
+//     const [a, b, c] = lines[i];
+//     if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
+//       return lines[i];
+//     }
+//   }
+//   return null;
+// }
+
+function calcWinnerGobang(squares) {
+  for (let i = 0; i < global.constants.column; i++) {
+    for (let j = 0; j < global.constants.raw; j++) {
+      if (squares[j][i]) {
+        const result = calcWinnerLine(squares[j][i], i, j, squares)
+        if (result) {
+          return result;
+        }
+      }
+    }
+  }
+  return null;
+}
+
+function calcWinnerLine(calcSquare, calcColumn, calcRaw, squares) {
+  console.log("啊啊啊啊啊calcSquare" + calcSquare);
+  for (let i = calcColumn; i < global.constants.column; i++) {
+    for (let j = calcRaw; j < global.constants.raw; j++) {
+      const resultShu = calcShu(calcSquare, calcColumn, calcRaw, squares)
+      if (resultShu) {
+        return resultShu;
+      }
+      const resultXie = calcXie(calcSquare, calcColumn, calcRaw, squares)
+      if (resultXie) {
+        return resultXie;
+      }
+      const resultHeng = calcHeng(calcSquare, calcColumn, calcRaw, squares)
+      if (resultHeng) {
+        return resultHeng;
+      }
+    }
+  }
+  return null;
+}
+
+function calcShu(calcSquare, calcColumn, calcRaw, squares) {
+  const linkLine = [];
+  for (let i = calcRaw; i < global.constants.raw; i++) {
+    if (squares[i][calcColumn] === calcSquare) {
+      linkLine.push([calcColumn, i])
+    } else {
+      return null;
+    }
+    if (linkLine.length === global.constants.winnerNum) {
+      return linkLine;
+    }
+  }
+  return null;
+}
+function calcXie(calcSquare, calcColumn, calcRaw, squares) {
+  var linkLine = [];
+  //往右下找
+  for (let i = calcColumn; i < global.constants.column; i++) {
+    for (let j = calcRaw; j < global.constants.raw; j++)
+      if (squares[j][i] === calcSquare) {
+        linkLine.push([i, j])
+        i++;
+      }
+    if (linkLine.length === global.constants.winnerNum) {
+      return linkLine;
+    }
+  }
+  linkLine = [];
+  //往右上找
+  for (let i = calcColumn; i < global.constants.column; i++) {
+    for (let j = calcRaw; j >= 0; j--)
+      if (squares[j][i] === calcSquare) {
+        linkLine.push([i, j])
+        i++;
+      } else {
+        return null;
+      }
+    if (linkLine.length === global.constants.winnerNum) {
+      return linkLine;
+    }
+  }
+
+  return null;
+}
+function calcHeng(calcSquare, calcColumn, calcRaw, squares) {
+  const linkLine = [];
+  for (let i = calcColumn; i < global.constants.column; i++) {
+    if (squares[calcRaw][i] === calcSquare) {
+      linkLine.push([i, calcRaw])
+    } else {
+      return null;
+    }
+    if (linkLine.length === global.constants.winnerNum) {
+      return linkLine;
     }
   }
   return null;

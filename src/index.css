@@ -58,3 +58,7 @@ ul {
 .button {
     margin-top: 5px;
 }
+
+.winnerSquare {
+    background: yellow;
+}
