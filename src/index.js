@@ -264,33 +264,33 @@ function calcShu(calcSquare, calcColumn, calcRaw, squares) {
   return null;
 }
 function calcXie(calcSquare, calcColumn, calcRaw, squares) {
-  var linkLine = [];
   //往右下找
-  for (let i = calcColumn; i < global.constants.column; i++) {
-    for (let j = calcRaw; j < global.constants.raw; j++)
-      if (squares[j][i] === calcSquare) {
-        linkLine.push([i, j])
-        i++;
-      }
-    if (linkLine.length === global.constants.winnerNum) {
-      return linkLine;
+  var linkLine = [];
+  for (let j = calcRaw, i = calcColumn; j < global.constants.raw && i < global.constants.column; j++) {
+    if (squares[j][i] === calcSquare) {
+      linkLine.push([i, j])
+      i++;
+    } else {
+      break;
     }
-  }
-  linkLine = [];
-  //往右上找
-  for (let i = calcColumn; i < global.constants.column; i++) {
-    for (let j = calcRaw; j >= 0; j--)
-      if (squares[j][i] === calcSquare) {
-        linkLine.push([i, j])
-        i++;
-      } else {
-        return null;
-      }
     if (linkLine.length === global.constants.winnerNum) {
       return linkLine;
     }
   }
 
+  //往右上找
+  linkLine = [];
+  for (let j = calcRaw, i = calcColumn; j >= 0 && i < global.constants.column; j--) {
+    if (squares[j][i] === calcSquare) {
+      linkLine.push([i, j])
+      i++;
+    } else {
+      break;
+    }
+    if (linkLine.length === global.constants.winnerNum) {
+      return linkLine;
+    }
+  }
   return null;
 }
 function calcHeng(calcSquare, calcColumn, calcRaw, squares) {
