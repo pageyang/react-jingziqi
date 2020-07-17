@@ -293,6 +293,7 @@ function calcXie(calcSquare, calcColumn, calcRaw, squares) {
   }
   return null;
 }
+
 function calcHeng(calcSquare, calcColumn, calcRaw, squares) {
   const linkLine = [];
   for (let i = calcColumn; i < global.constants.column; i++) {

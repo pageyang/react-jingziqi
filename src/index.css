@@ -11,7 +11,7 @@ ul {
 .board-row:after {
     clear: both;
     content: "";
-    display: table;
+    /* display: table-row; */
 }
 
 .status {
@@ -31,6 +31,7 @@ ul {
     padding: 0;
     text-align: center;
     width: 34px;
+    word-break: keep-all;
 }
 
 .square:focus {
@@ -42,8 +43,9 @@ ul {
 }
 
 .game {
-    display: flex;
+    /* display: flex; */
     flex-direction: row;
+    display: table;
 }
 
 .game-info {
