@@ -22,15 +22,15 @@ ul {
     background: #fff;
     border: 1px solid #999;
     float: left;
-    font-size: 24px;
+    font-size: 20px;
     font-weight: bold;
-    line-height: 34px;
-    height: 34px;
+    line-height: 30px;
+    height: 30px;
     margin-right: -1px;
     margin-top: -1px;
     padding: 0;
     text-align: center;
-    width: 34px;
+    width: 30px;
     word-break: keep-all;
 }
 
@@ -46,7 +46,7 @@ ul {
     display: flex;
     flex-direction: row;
     /* display: table; */
-    width: 500px;
+    width: 800px;
 }
 
 .game-info {

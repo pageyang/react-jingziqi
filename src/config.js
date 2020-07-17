@@ -1,5 +1,5 @@
 global.constants = {
-    raw: 8,
-    column: 8,
+    raw: 18,
+    column: 18,
     winnerNum: 5,
 };
