@@ -11,7 +11,7 @@ ul {
 .board-row:after {
     clear: both;
     content: "";
-    /* display: table-row; */
+    display: table;
 }
 
 .status {
@@ -43,9 +43,10 @@ ul {
 }
 
 .game {
-    /* display: flex; */
+    display: flex;
     flex-direction: row;
-    display: table;
+    /* display: table; */
+    width: 500px;
 }
 
 .game-info {

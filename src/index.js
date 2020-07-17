@@ -129,7 +129,7 @@ class Game extends React.Component {
       return null;
     }
     for (let k = 0; k < winnerLine.length; k++) {
-      console.log("啊啊啊啊啊 point" + winnerLine[k]);
+      // console.log("啊啊啊啊啊 point" + winnerLine[k]);
       if (winnerLine[k][0] === i && winnerLine[k][1] === j) {
         return styles;
       }
@@ -145,7 +145,7 @@ class Game extends React.Component {
   handleClick(i, j) {
     //创建副本
     const history = this.state.history.slice(0, this.state.stepNumber + 1);
-    console.log(history);
+    // console.log(history);
     const current = history[history.length - 1];
     // const squares = current.squares.slice();
 
@@ -172,11 +172,9 @@ class Game extends React.Component {
       //历史记录排序方式
       descendingOrder: this.state.descendingOrder,
     });
-    console.log("啊啊啊啊啊" + this.state.history);
   }
 
   jumpTo(step) {
-    console.log("啊啊啊啊啊step" + step);
     this.setState({
       stepNumber: step,
       xIsNext: (step % 2) === 0,
@@ -229,7 +227,7 @@ function calcWinnerGobang(squares) {
 }
 
 function calcWinnerLine(calcSquare, calcColumn, calcRaw, squares) {
-  console.log("啊啊啊啊啊calcSquare" + calcSquare);
+  // console.log("啊啊啊啊啊calcSquare" + calcSquare);
   for (let i = calcColumn; i < global.constants.column; i++) {
     for (let j = calcRaw; j < global.constants.raw; j++) {
       const resultShu = calcShu(calcSquare, calcColumn, calcRaw, squares)
